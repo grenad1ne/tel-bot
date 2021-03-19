@@ -49,12 +49,11 @@ try {
 //        fwrite($fp, $reasonText . PHP_EOL);
 //        fclose($fp);
 
-        $a = (string)mb_stripos($text, '/add');
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега" . $a,
+                'text' => "Опа, новая отмазочка для Олега"
             ]
         );
     }
