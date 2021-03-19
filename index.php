@@ -1,3 +1,6 @@
+<html>
+
+
 <?php
 
 /*
@@ -43,6 +46,9 @@ try {
         print_r(stripos($text, '/add-reason'));
 
         $reasonText = substr($text, stripos($text, '/add-reason'));
+        ?>
+        <p>hello, world</p>
+    <?php
         print_r($reasonText);
 
         $fp = fopen('./reasons.txt', 'a+');
@@ -62,3 +68,5 @@ try {
     //echo $e->getMessage();
 
 }
+?>
+</html>
