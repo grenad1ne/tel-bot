@@ -41,8 +41,7 @@ try {
 
     if (stripos($text, '/add')) {
 //
-        $reasonText = substr($text, stripos($text, '/add'));
-        print_r($reasonText);
+        $reasonText = substr($text, stripos($text, '/add') + 5);
 //
 //        $fp = fopen('./reasons.txt', 'a+');
 //        fwrite($fp, $reasonText . PHP_EOL);
