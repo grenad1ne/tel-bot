@@ -8,4 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'Feed' => $vendorDir . '/dg/rss-php/src/Feed.php',
     'FeedException' => $vendorDir . '/dg/rss-php/src/Feed.php',
+    'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
 );

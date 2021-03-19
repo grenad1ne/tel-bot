@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Promise;
 
 /**
@@ -9,20 +10,25 @@ class EachPromise implements PromisorInterface
 {
     private $pending = [];
 
-    /** @var \Iterator */
+    private $nextPendingIndex = 0;
+
+    /** @var \Iterator|null */
     private $iterable;
 
-    /** @var callable|int */
+    /** @var callable|int|null */
     private $concurrency;
 
-    /** @var callable */
+    /** @var callable|null */
     private $onFulfilled;
 
-    /** @var callable */
+    /** @var callable|null */
     private $onRejected;
 
-    /** @var Promise */
+    /** @var Promise|null */
     private $aggregate;
+
+    /** @var bool|null */
+    private $mutex;
 
     /**
      * Configuration hash can include the following key value pairs:
@@ -42,12 +48,12 @@ class EachPromise implements PromisorInterface
      *   allowed number of outstanding concurrently executing promises,
      *   creating a capped pool of promises. There is no limit by default.
      *
-     * @param mixed    $iterable Promises or values to iterate.
-     * @param array    $config   Configuration options
+     * @param mixed $iterable Promises or values to iterate.
+     * @param array $config   Configuration options
      */
     public function __construct($iterable, array $config = [])
     {
-        $this->iterable = iter_for($iterable);
+        $this->iterable = Create::iterFor($iterable);
 
         if (isset($config['concurrency'])) {
             $this->concurrency = $config['concurrency'];
@@ -62,6 +68,7 @@ class EachPromise implements PromisorInterface
         }
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function promise()
     {
         if ($this->aggregate) {
@@ -70,17 +77,35 @@ class EachPromise implements PromisorInterface
 
         try {
             $this->createPromise();
+            /** @psalm-assert Promise $this->aggregate */
             $this->iterable->rewind();
-            $this->refillPending();
+            if (!$this->checkIfFinished()) {
+                $this->refillPending();
+            }
+        } catch (\Throwable $e) {
+            /**
+             * @psalm-suppress NullReference
+             * @phpstan-ignore-next-line
+             */
+            $this->aggregate->reject($e);
         } catch (\Exception $e) {
+            /**
+             * @psalm-suppress NullReference
+             * @phpstan-ignore-next-line
+             */
             $this->aggregate->reject($e);
         }
 
+        /**
+         * @psalm-suppress NullableReturnStatement
+         * @phpstan-ignore-next-line
+         */
         return $this->aggregate;
     }
 
     private function createPromise()
     {
+        $this->mutex = false;
         $this->aggregate = new Promise(function () {
             reset($this->pending);
             // Consume a potentially fluctuating list of promises while
@@ -88,7 +113,7 @@ class EachPromise implements PromisorInterface
             while ($promise = current($this->pending)) {
                 next($this->pending);
                 $promise->wait();
-                if ($this->aggregate->getState() !== PromiseInterface::PENDING) {
+                if (Is::settled($this->aggregate)) {
                     return;
                 }
             }
@@ -98,6 +123,7 @@ class EachPromise implements PromisorInterface
         $clearFn = function () {
             $this->iterable = $this->concurrency = $this->pending = null;
             $this->onFulfilled = $this->onRejected = null;
+            $this->nextPendingIndex = 0;
         };
 
         $this->aggregate->then($clearFn, $clearFn);
@@ -137,22 +163,32 @@ class EachPromise implements PromisorInterface
             return false;
         }
 
-        $promise = promise_for($this->iterable->current());
-        $idx = $this->iterable->key();
+        $promise = Create::promiseFor($this->iterable->current());
+        $key = $this->iterable->key();
+
+        // Iterable keys may not be unique, so we use a counter to
+        // guarantee uniqueness
+        $idx = $this->nextPendingIndex++;
 
         $this->pending[$idx] = $promise->then(
-            function ($value) use ($idx) {
+            function ($value) use ($idx, $key) {
                 if ($this->onFulfilled) {
                     call_user_func(
-                        $this->onFulfilled, $value, $idx, $this->aggregate
+                        $this->onFulfilled,
+                        $value,
+                        $key,
+                        $this->aggregate
                     );
                 }
                 $this->step($idx);
             },
-            function ($reason) use ($idx) {
+            function ($reason) use ($idx, $key) {
                 if ($this->onRejected) {
                     call_user_func(
-                        $this->onRejected, $reason, $idx, $this->aggregate
+                        $this->onRejected,
+                        $reason,
+                        $key,
+                        $this->aggregate
                     );
                 }
                 $this->step($idx);
@@ -164,11 +200,25 @@ class EachPromise implements PromisorInterface
 
     private function advanceIterator()
     {
+        // Place a lock on the iterator so that we ensure to not recurse,
+        // preventing fatal generator errors.
+        if ($this->mutex) {
+            return false;
+        }
+
+        $this->mutex = true;
+
         try {
             $this->iterable->next();
+            $this->mutex = false;
             return true;
+        } catch (\Throwable $e) {
+            $this->aggregate->reject($e);
+            $this->mutex = false;
+            return false;
         } catch (\Exception $e) {
             $this->aggregate->reject($e);
+            $this->mutex = false;
             return false;
         }
     }
@@ -176,14 +226,16 @@ class EachPromise implements PromisorInterface
     private function step($idx)
     {
         // If the promise was already resolved, then ignore this step.
-        if ($this->aggregate->getState() !== PromiseInterface::PENDING) {
+        if (Is::settled($this->aggregate)) {
             return;
         }
 
         unset($this->pending[$idx]);
-        $this->advanceIterator();
 
-        if (!$this->checkIfFinished()) {
+        // Only refill pending promises if we are not locked, preventing the
+        // EachPromise to recursively invoke the provided iterator, which
+        // cause a fatal error: "Cannot resume an already running generator"
+        if ($this->advanceIterator() && !$this->checkIfFinished()) {
             // Add more pending promises if possible.
             $this->refillPending();
         }

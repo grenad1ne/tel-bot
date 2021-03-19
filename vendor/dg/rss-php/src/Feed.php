@@ -5,7 +5,7 @@
  *
  * @copyright  Copyright (c) 2008 David Grudl
  * @license    New BSD License
- * @version    1.2
+ * @version    1.5
  */
 class Feed
 {
@@ -14,6 +14,9 @@ class Feed
 
 	/** @var string */
 	public static $cacheDir;
+
+	/** @var string */
+	public static $userAgent = 'FeedFetcher-Google';
 
 	/** @var SimpleXMLElement */
 	protected $xml;
@@ -27,7 +30,7 @@ class Feed
 	 * @return Feed
 	 * @throws FeedException
 	 */
-	public static function load($url, $user = NULL, $pass = NULL)
+	public static function load($url, $user = null, $pass = null)
 	{
 		$xml = self::loadXml($url, $user, $pass);
 		if ($xml->channel) {
@@ -46,7 +49,7 @@ class Feed
 	 * @return Feed
 	 * @throws FeedException
 	 */
-	public static function loadRss($url, $user = NULL, $pass = NULL)
+	public static function loadRss($url, $user = null, $pass = null)
 	{
 		return self::fromRss(self::loadXml($url, $user, $pass));
 	}
@@ -60,7 +63,7 @@ class Feed
 	 * @return Feed
 	 * @throws FeedException
 	 */
-	public static function loadAtom($url, $user = NULL, $pass = NULL)
+	public static function loadAtom($url, $user = null, $pass = null)
 	{
 		return self::fromAtom(self::loadXml($url, $user, $pass));
 	}
@@ -93,8 +96,8 @@ class Feed
 
 	private static function fromAtom(SimpleXMLElement $xml)
 	{
-		if (!in_array('http://www.w3.org/2005/Atom', $xml->getDocNamespaces(), TRUE)
-			&& !in_array('http://purl.org/atom/ns#', $xml->getDocNamespaces(), TRUE)
+		if (!in_array('http://www.w3.org/2005/Atom', $xml->getDocNamespaces(), true)
+			&& !in_array('http://purl.org/atom/ns#', $xml->getDocNamespaces(), true)
 		) {
 			throw new FeedException('Invalid feed.');
 		}
@@ -137,9 +140,9 @@ class Feed
 	 * @param  SimpleXMLElement
 	 * @return array
 	 */
-	public function toArray(SimpleXMLElement $xml = NULL)
+	public function toArray(SimpleXMLElement $xml = null)
 	{
-		if ($xml === NULL) {
+		if ($xml === null) {
 			$xml = $this->xml;
 		}
 
@@ -147,7 +150,7 @@ class Feed
 			return (string) $xml;
 		}
 
-		$arr = array();
+		$arr = [];
 		foreach ($xml->children() as $tag => $child) {
 			if (count($xml->$tag) === 1) {
 				$arr[$tag] = $this->toArray($child);
@@ -188,7 +191,7 @@ class Feed
 			throw new FeedException('Cannot load feed.');
 		}
 
-		return new SimpleXMLElement($data, LIBXML_NOWARNING | LIBXML_NOERROR);
+		return new SimpleXMLElement($data, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NOCDATA);
 	}
 
 
@@ -197,7 +200,7 @@ class Feed
 	 * @param  string
 	 * @param  string
 	 * @param  string
-	 * @return string|FALSE
+	 * @return string|false
 	 * @throws FeedException
 	 */
 	private static function httpRequest($url, $user, $pass)
@@ -205,26 +208,35 @@ class Feed
 		if (extension_loaded('curl')) {
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
-			if ($user !== NULL || $pass !== NULL) {
+			if ($user !== null || $pass !== null) {
 				curl_setopt($curl, CURLOPT_USERPWD, "$user:$pass");
 			}
-			curl_setopt($curl, CURLOPT_HEADER, FALSE);
+			curl_setopt($curl, CURLOPT_USERAGENT, self::$userAgent); // some feeds require a user agent
+			curl_setopt($curl, CURLOPT_HEADER, false);
 			curl_setopt($curl, CURLOPT_TIMEOUT, 20);
-			curl_setopt($curl, CURLOPT_ENCODING , '');
-			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // no echo, just return result
+			curl_setopt($curl, CURLOPT_ENCODING, '');
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // no echo, just return result
 			if (!ini_get('open_basedir')) {
-				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE); // sometime is useful :)
+				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); // sometime is useful :)
 			}
 			$result = curl_exec($curl);
 			return curl_errno($curl) === 0 && curl_getinfo($curl, CURLINFO_HTTP_CODE) === 200
 				? $result
-				: FALSE;
-
-		} elseif ($user === NULL && $pass === NULL) {
-			return file_get_contents($url);
+				: false;
 
 		} else {
-			throw new FeedException('PHP extension CURL is not loaded.');
+			$context = null;
+			if ($user !== null && $pass !== null) {
+				$options = [
+					'http' => [
+						'method' => 'GET',
+						'header' => 'Authorization: Basic ' . base64_encode($user . ':' . $pass) . "\r\n",
+					],
+				];
+				$context = stream_context_create($options);
+			}
+
+			return file_get_contents($url, false, $context);
 		}
 	}
 
@@ -236,14 +248,13 @@ class Feed
 	 */
 	private static function adjustNamespaces($el)
 	{
-		foreach ($el->getNamespaces(TRUE) as $prefix => $ns) {
+		foreach ($el->getNamespaces(true) as $prefix => $ns) {
 			$children = $el->children($ns);
 			foreach ($children as $tag => $content) {
 				$el->{$prefix . ':' . $tag} = $content;
 			}
 		}
 	}
-
 }
 
 
