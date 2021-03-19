@@ -3,6 +3,7 @@
 require 'vendor/autoload.php';
 
 use Telegram\Bot\Api;
+use Telegram\Bot\Keyboard\Keyboard;
 
 $telegram = new Api('1706737657:AAGwdAYlMkxPqm6p_48eKcNlqugBLVswDsI');
 $url = 'https://excuse-telegram-bot.herokuapp.com'; // URL RSS feed
@@ -17,7 +18,7 @@ $keyboard = [["Последние статьи"], ["Картинка"], ["Гиф
 if ($text) {
     if ($text == "/start") {
         $reply = "Добро пожаловать в бота!";
-        $reply_markup = $telegram->replyKeyboardMarkup(
+        $reply_markup = Keyboard::make(
             ['keyboard' => $keyboard, 'resize_keyboard' => true, 'one_time_keyboard' => false]
         );
         $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'reply_markup' => $reply_markup]);
