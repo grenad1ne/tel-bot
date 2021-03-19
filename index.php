@@ -40,7 +40,7 @@ try {
     }
 
     if ($text === '/add') {
-//        print_r(stripos($text, '/add-reason'));
+        $a = print_r(stripos($text, '/a'));
 //
 //        $reasonText = substr($text, stripos($text, '/add-reason'));
 //        print_r($reasonText);
@@ -53,7 +53,7 @@ try {
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега"
+                'text' => "Опа, новая отмазочка для Олега" . $a,
             ]
         );
     }
