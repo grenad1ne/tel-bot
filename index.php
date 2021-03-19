@@ -53,7 +53,7 @@ try {
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега" . stripos($text, '/add-reason'),
+                'text' => "Опа, новая отмазочка для Олега" . mb_stripos($text, '/add'),
             ]
         );
     }
