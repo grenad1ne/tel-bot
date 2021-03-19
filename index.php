@@ -31,9 +31,9 @@ if ($text) {
         );
         $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'reply_markup' => $reply_markup]);
     } elseif ($text === "/bro") {
-        $telegram->sendPhoto(['chat_id' => $chat_id, 'photo' => $brokeBackMountain]);
+//        $telegram->sendPhoto(['chat_id' => $chat_id, 'photo' => $brokeBackMountain]);
     } elseif ($text === "/hui") {
-        $telegram->sendPhoto(['chat_id' => $chat_id, 'photo' => $dildo]);
+//        $telegram->sendPhoto(['chat_id' => $chat_id, 'photo' => $dildo]);
     } elseif ($text === "Срочно нужна причина для отмазки") {
         $key = array_rand($reasons);
         $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reasons[$key]]);
