@@ -28,7 +28,7 @@ $reasons = file('./reasons.txt');
 try {
     $text = $update->message->text;
 
-    if ($text && stripos($text, '/add') === false) {
+    if ($text) {
         $rand_key = array_rand($reasons, 1);
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
@@ -39,25 +39,25 @@ try {
         );
     }
 
-    if ($text === '/add') {
-//        print_r(stripos($text, '/add-reason'));
+//    if ($text === '/add') {
+////        print_r(stripos($text, '/add-reason'));
+////
+////        $reasonText = substr($text, stripos($text, '/add-reason'));
+////        print_r($reasonText);
+////
+////        $fp = fopen('./reasons.txt', 'a+');
+////        fwrite($fp, $reasonText . PHP_EOL);
+////        fclose($fp);
 //
-//        $reasonText = substr($text, stripos($text, '/add-reason'));
-//        print_r($reasonText);
-//
-//        $fp = fopen('./reasons.txt', 'a+');
-//        fwrite($fp, $reasonText . PHP_EOL);
-//        fclose($fp);
-
-        $a = (string)mb_stripos($text, '/add');
-        $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
-        $response = $client->sendMessage(
-            [
-                'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега" . $a,
-            ]
-        );
-    }
+//        $a = (string)mb_stripos($text, '/add');
+//        $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
+//        $response = $client->sendMessage(
+//            [
+//                'chat_id' => $update->message->chat->id,
+//                'text' => "Опа, новая отмазочка для Олега" . $a,
+//            ]
+//        );
+//    }
 } catch (\Zelenin\Telegram\Bot\NotOkException $e) {
     //echo error message ot log it
     //echo $e->getMessage();
