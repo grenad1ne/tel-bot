@@ -14,6 +14,9 @@ $text = $result["message"]["text"]; //Текст сообщения
 $chat_id = $result["message"]["chat"]["id"]; //Уникальный идентификатор пользователя
 $name = $result["message"]["from"]["username"]; //Юзернейм пользователя
 $keyboard = [["Срочно нужна причина для отмазки"]]; //Клавиатура
+$brokeBackMountain = 'https://avatars.mds.yandex.net/get-ott/1531675/2a00000176680c1e3250d9adabbd157aa3d0/1344x756';
+$dildo = 'https://www.sexsoshop.ru/img/tovars/LoveToy/2660010001961-1.jpg';
+
 $reasons = [
     'Леха сломал',
     'Сплю еще',
@@ -27,6 +30,12 @@ if ($text) {
             ['keyboard' => $keyboard, 'resize_keyboard' => true, 'one_time_keyboard' => false]
         );
         $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'reply_markup' => $reply_markup]);
+    } elseif ($text === "/bro") {
+        $key = array_rand($reasons);
+        $telegram->sendMessage(['chat_id' => $chat_id, 'photo' => $brokeBackMountain]);
+    } elseif ($text === "/hui") {
+        $key = array_rand($reasons);
+        $telegram->sendMessage(['chat_id' => $chat_id, 'photo' => $dildo]);
     } elseif ($text === "Срочно нужна причина для отмазки") {
         $key = array_rand($reasons);
         $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reasons[$key]]);
