@@ -39,11 +39,10 @@ try {
         );
     }
 
-    if ($text === '/add') {
-        $a = print_r(stripos($text, '/a'));
+    if (stripos($text, '/add')) {
 //
-//        $reasonText = substr($text, stripos($text, '/add-reason'));
-//        print_r($reasonText);
+        $reasonText = substr($text, stripos($text, '/add'));
+        print_r($reasonText);
 //
 //        $fp = fopen('./reasons.txt', 'a+');
 //        fwrite($fp, $reasonText . PHP_EOL);
@@ -53,7 +52,7 @@ try {
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега" . $a,
+                'text' => "Опа, новая отмазочка для Олега" . $reasonText,
             ]
         );
     }
