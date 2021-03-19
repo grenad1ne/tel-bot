@@ -21,6 +21,7 @@ require 'vendor/autoload.php';
 
 $client = new Zelenin\Telegram\Bot\Api('1706737657:AAGwdAYlMkxPqm6p_48eKcNlqugBLVswDsI'); // Set your access token
 $url = 'https://excuse-telegram-bot.herokuapp.com'; // URL RSS feed
+$contents = file_get_contents('php://input');
 $update = json_decode(file_get_contents('php://input'));
 $reasons = file('./reasons.txt');
 
@@ -51,7 +52,7 @@ try {
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "Опа, новая отмазочка для Олега" . $reasonText,
+                'text' => "Опа, новая отмазочка для Олега" . $contents,
             ]
         );
     }
