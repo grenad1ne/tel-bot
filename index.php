@@ -14,10 +14,15 @@ $text = $result["message"]["text"]; //Текст сообщения
 $chat_id = $result["message"]["chat"]["id"]; //Уникальный идентификатор пользователя
 $name = $result["message"]["from"]["username"]; //Юзернейм пользователя
 $keyboard = [["Срочно нужна причина для отмазки"]]; //Клавиатура
+$reasons = [
+    'Леха сломал',
+    'Сплю еще',
+    'Потерялся',
+];
 
 if ($text) {
     if ($text === "/start") {
-        $reply = "Добро пожаловать в бота!";
+        $reply = "Меня зовут Олег и опять решил проебаться";
         $reply_markup = Keyboard::make(
             ['keyboard' => $keyboard, 'resize_keyboard' => true, 'one_time_keyboard' => false]
         );
@@ -25,8 +30,7 @@ if ($text) {
     } elseif ($text === "Срочно нужна причина для отмазки") {
         $reply = "Причина для отмазыча";
         $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reply]);
-    }
-    else {
+    } else {
         $reply = "Тупо тыкай кнопку. Здесь нет дополнительного функционала";
         $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reply]);
     }
