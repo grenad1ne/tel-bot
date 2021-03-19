@@ -28,7 +28,7 @@ $reasons = file('./reasons.txt');
 try {
     $text = $update->message->text;
 
-    if ($text) {
+    if ($text && stripos($text, '/add-reason') === false) {
         $rand_key = array_rand($reasons, 1);
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
@@ -39,9 +39,12 @@ try {
         );
     }
 
-
     if (stripos($text, '/add-reason')) {
+        print_r(stripos($text, '/add-reason'));
+
         $reasonText = substr($text, stripos($text, '/add-reason'));
+        print_r($reasonText);
+
         $fp = fopen('./reasons.txt', 'a+');
         fwrite($fp, $reasonText . PHP_EOL);
         fclose($fp);
