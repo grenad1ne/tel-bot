@@ -1,3 +1,8 @@
+<script>
+    setTimeout(function () { window.location.reload(); }, 10*60*1000);
+    console.log(new Date());
+</script>
+
 <?php
 
 require 'vendor/autoload.php';
