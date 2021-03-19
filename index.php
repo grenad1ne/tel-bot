@@ -5,7 +5,7 @@ require 'vendor/autoload.php';
 use Telegram\Bot\Api;
 use Telegram\Bot\Keyboard\Keyboard;
 
-$telegram = new Api('1706737657:AAGwdAYlMkxPqm6p_48eKcNlqugBLVswDsI');
+$telegram = new Api('1735568884:AAHwl4IOTJSkdtaQx_nCrWWOE4WMSVn-1fE');
 $url = 'https://excuse-telegram-bot.herokuapp.com'; // URL RSS feed
 
 $result = $telegram->getWebhookUpdates();
