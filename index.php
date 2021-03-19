@@ -28,16 +28,16 @@ $reasons = file('./reasons.txt');
 try {
     $text = $update->message->text;
 
-    if ($text) {
-        $rand_key = array_rand($reasons, 1);
-        $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
-        $response = $client->sendMessage(
-            [
-                'chat_id' => $update->message->chat->id,
-                'text' => "Друзья, простите. Причина моего проеба: " . $reasons[$rand_key],
-            ]
-        );
-    }
+//    if ($text) {
+//        $rand_key = array_rand($reasons, 1);
+//        $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
+//        $response = $client->sendMessage(
+//            [
+//                'chat_id' => $update->message->chat->id,
+//                'text' => "Друзья, простите. Причина моего проеба: " . $reasons[$rand_key],
+//            ]
+//        );
+//    }
 
     if (stripos($text, '/add')) {
 //
