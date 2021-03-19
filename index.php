@@ -16,13 +16,17 @@ $name = $result["message"]["from"]["username"]; //Юзернейм пользо�
 $keyboard = [["Срочно нужна причина для отмазки"]]; //Клавиатура
 
 if ($text) {
-    if ($text == "/start") {
+    if ($text === "/start") {
         $reply = "Добро пожаловать в бота!";
         $reply_markup = Keyboard::make(
             ['keyboard' => $keyboard, 'resize_keyboard' => true, 'one_time_keyboard' => false]
         );
         $telegram->sendMessage(['chat_id' => $chat_id, 'text' => $reply, 'reply_markup' => $reply_markup]);
-    } else {
+    } elseif ($text === "Срочно нужна причина для отмазки") {
+        $reply = "Причина для отмазыча";
+        $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reply]);
+    }
+    else {
         $reply = "Тупо тыкай кнопку. Здесь нет дополнительного функционала";
         $telegram->sendMessage(['chat_id' => $chat_id, 'parse_mode' => 'HTML', 'text' => $reply]);
     }
