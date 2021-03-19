@@ -39,7 +39,7 @@ try {
 //        );
 //    }
 
-    if (stripos($text, '/add')) {
+    if ($text === '/add') {
 //
         $reasonText = substr($text, stripos($text, '/add') + 5);
 //
