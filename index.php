@@ -26,62 +26,33 @@ $reasons = file('./reasons.txt');
 
 //your app
 try {
-    if ($update->message->text) {
+    $text = $update->message->text;
+
+    if ($text) {
         $rand_key = array_rand($reasons, 1);
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => $reasons[$rand_key],
+                'text' => "Друзья, простите. Причина моего проеба: " . $reasons[$rand_key],
             ]
         );
     }
 
-    if ($update->message->text == '/email') {
+
+    if (stripos($text, '/add-reason')) {
+        $reasonText = substr($text, stripos($text, '/add-reason'));
+        $fp = fopen('./reasons.txt', 'a+');
+        fwrite($fp, $reasonText . PHP_EOL);
+        fclose($fp);
+
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
             [
                 'chat_id' => $update->message->chat->id,
-                'text' => "You can send email to : Kasra@madadipouya.com",
+                'text' => "Опа, новая отмазочка для Олега",
             ]
         );
-    } else {
-        if ($update->message->text == '/help') {
-            $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
-            $response = $client->sendMessage(
-                [
-                    'chat_id' => $update->message->chat->id,
-                    'text' => "List of commands :\n /email -> Get email address of the owner \n /latest -> Get latest posts of the blog 
-    		/help -> Shows list of available commands",
-                ]
-            );
-        } else {
-            if ($update->message->text == '/latest') {
-                Feed::$cacheDir = __DIR__ . '/cache';
-                Feed::$cacheExpire = '5 hours';
-                $rss = Feed::loadRss($url);
-                $items = $rss->item;
-                $lastitem = $items[0];
-                $lastlink = $lastitem->link;
-                $lasttitle = $lastitem->title;
-                $message = $lasttitle . " \n " . $lastlink;
-                $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
-                $response = $client->sendMessage(
-                    [
-                        'chat_id' => $update->message->chat->id,
-                        'text' => $message,
-                    ]
-                );
-            } else {
-                $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
-                $response = $client->sendMessage(
-                    [
-                        'chat_id' => $update->message->chat->id,
-                        'text' => "Invalid command, please use /help to get list of available commands",
-                    ]
-                );
-            }
-        }
     }
 } catch (\Zelenin\Telegram\Bot\NotOkException $e) {
     //echo error message ot log it
