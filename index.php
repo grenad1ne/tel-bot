@@ -1,6 +1,3 @@
-<html>
-
-
 <?php
 
 /*
@@ -43,17 +40,14 @@ try {
     }
 
     if (stripos($text, '/add-reason')) {
-        print_r(stripos($text, '/add-reason'));
-
-        $reasonText = substr($text, stripos($text, '/add-reason'));
-        ?>
-        <p>hello, world</p>
-    <?php
-        print_r($reasonText);
-
-        $fp = fopen('./reasons.txt', 'a+');
-        fwrite($fp, $reasonText . PHP_EOL);
-        fclose($fp);
+//        print_r(stripos($text, '/add-reason'));
+//
+//        $reasonText = substr($text, stripos($text, '/add-reason'));
+//        print_r($reasonText);
+//
+//        $fp = fopen('./reasons.txt', 'a+');
+//        fwrite($fp, $reasonText . PHP_EOL);
+//        fclose($fp);
 
         $response = $client->sendChatAction(['chat_id' => $update->message->chat->id, 'action' => 'typing']);
         $response = $client->sendMessage(
@@ -68,5 +62,3 @@ try {
     //echo $e->getMessage();
 
 }
-?>
-</html>
